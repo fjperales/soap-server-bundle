@@ -24,14 +24,8 @@ class SoapServer
         $this->serviceName = str_replace("/", "", $this->uri->getPath());
     }
 
-    public function handle(ServiceAbstract $service)
+    public function handle(ServiceInterface $service)
     {
-        if($service->getWsdlFile() and !$service->getUri()){
-            throw new \Exception("For a WSDL mode the wsdl file is required");
-        }elseif(!$service->getWsdlFile() and $service->getUri()){
-            throw new \Exception("For a NO WSDL mode the uri is required");
-        }
-
         if($service->getWsdlFile() and !file_exists($service->getWsdlFile())){
             if(!$service->getWsdlTemplate()){
                 throw new \Exception("For regenerate a wsdl file, a configured template is required");
@@ -81,7 +75,7 @@ class SoapServer
         }
     }
 
-    private function handleAction(\SoapServer $soapServer, ServiceAbstract $service)
+    private function handleAction(\SoapServer $soapServer, ServiceInterface $service)
     {
         // Do handler
         try {
@@ -106,14 +100,15 @@ class SoapServer
 
     private function sendResponse(
         $response,
-        ServiceAbstract $service
+        ServiceInterface $service
     ) {
         $service->setResponse($response);
 
-        return new Response($service->getResponse(), Response::HTTP_OK, array(
+        $response = new Response($service->getResponse(), Response::HTTP_OK, array(
             'Content-Type' => 'text/xml;charset=utf-8',
             'Content-Length' => strlen($service->getResponse())
         ));
+        $response->send();
     }
 
     private function getSoapFault($code, $message)
@@ -131,7 +126,7 @@ class SoapServer
     private function sendSoapFault(
         $code,
         $message,
-        ServiceAbstract $service
+        ServiceInterface $service
     ) {
         $soapFaultMessage = $this->getSoapFault($code, $message);
         $service->setResponse($soapFaultMessage);

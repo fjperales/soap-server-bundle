@@ -1,0 +1,20 @@
+
+version: '3'
+services:
+  pacop-soap-server:
+    build: .
+    container_name: pacop-soap-server
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./../..:/var/www/html/soap.local/:rw
+      - ./../../examples/public:/var/www/html/soap.local/public:rw
+      - ./apache/vhost:/etc/apache2/sites-enabled:rw
+      - ./apache/log:/var/log/apache2:rw
+      - ./apache/ssl:/etc/apache2/ssl:rw
+
+
+
+
+
